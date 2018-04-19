@@ -3,12 +3,9 @@
 
 
 
-This project is a continuation of the Backyard Flyer project where you executed a simple square shaped flight path. In this project you will integrate the techniques that you have learned throughout the last several lessons to plan a path through an urban environment. Check out the [project rubric](https://review.udacity.com/#!/rubrics/1534/view) for more detail on what constitutes a passing submission.
+This project is a continuation of the Backyard Flyer project where that executes a simple square shaped flight path. This project demonstrated planning and executing a path through an urban environment.
 
-## Option to do this project in a GPU backed virtual machine in the Udacity classroom!
-Rather than downloading the simulator and starter files you can simply complete this project in a virual workspace in the Udacity classroom! Follow [these instructions](https://classroom.udacity.com/nanodegrees/nd787/parts/5aa0a956-4418-4a41-846f-cb7ea63349b3/modules/0c12632a-b59a-41c1-9694-2b3508f47ce7/lessons/5f628104-5857-4a3f-93f0-d8a53fe6a8fd/concepts/ab09b378-f85f-49f4-8845-d59025dd8a8e?contentVersion=1.0.0&contentLocale=en-us) to proceed with the VM. 
-
-## To complete this project on your local machine, follow these instructions:
+## To run this project on your local machine, follow these instructions:
 ### Step 1: Download the Simulator
 This is a new simulator environment!  
 
@@ -19,7 +16,7 @@ If you haven't already, set up your Python environment and get all the relevant 
 
 ### Step 3: Clone this Repository
 ```sh
-git clone https://github.com/udacity/FCND-Motion-Planning
+git clone https://github.com/gpavlov2016/FCND-Motion-Planning
 ```
 ### Step 4: Test setup
 The first task in this project is to test the [solution code](https://github.com/udacity/FCND-Motion-Planning/blob/master/backyard_flyer_solution.py) for the Backyard Flyer project in this new simulator. Verify that your Backyard Flyer solution code works as expected and your drone can perform the square flight path in the new simulator. To do this, start the simulator and run the [`backyard_flyer_solution.py`](https://github.com/udacity/FCND-Motion-Planning/blob/master/backyard_flyer_solution.py) script.
@@ -44,7 +41,7 @@ python motion_planning.py
 
 You should see the quad fly a jerky path of waypoints to the northeast for about 10 m then land.  What's going on here? Your first task in this project is to explain what's different about `motion_planning.py` from the `backyard_flyer_solution.py` script, and how the functions provided in `planning_utils.py` work. 
 
-### Step 7: Write your planner
+## Planner
 
 Your planning algorithm is going to look something like the following:
 

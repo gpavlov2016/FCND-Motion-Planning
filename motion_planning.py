@@ -80,6 +80,7 @@ class MotionPlanning(Drone):
     def takeoff_transition(self):
         self.flight_state = States.TAKEOFF
         print("takeoff transition")
+        print(self.target_position[2])
         self.takeoff(self.target_position[2])
 
     def waypoint_transition(self):
@@ -130,11 +131,11 @@ class MotionPlanning(Drone):
         lon0 = first_line[1].split()[1]
         print(lat0, lon0)
 
-        # TODO: set home position to (lon0, lat0, 0)
+        # set home position to (lon0, lat0, 0)
         self.set_home_position(lon0, lat0, 0)
-        # TODO: retrieve current global position
+        # retrieve current global position
         print(self.global_position)
-        # TODO: convert to current local position using global_to_local()
+        # convert to current local position using global_to_local()
         (self._north, self._east, self._down) = global_to_local(self.global_position, self.global_home)
         print('global home {0}, position {1}, local position {2}'.format(self.global_home, self.global_position,
                                                                          self.local_position))
@@ -146,13 +147,13 @@ class MotionPlanning(Drone):
         print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
         # Define starting point on the grid (this is just grid center)
         grid_start = (-north_offset, -east_offset)
-        # TODO: convert start position to current position rather than map center
-        grid_start = (25,  100) #tuple(map(int, self.local_position[0:2]))
+        # convert start position to current position rather than map center
+        #grid_start = (25,  100) #tuple(map(int, self.local_position[0:2]))
         print('grid_start = ', grid_start)
 
         # Set goal as some arbitrary position on the grid
         grid_goal = (grid_start[0] + 10, grid_start[1] + 10)
-        # TODO: adapt to set goal as latitude / longitude position and convert
+        # adapt to set goal as latitude / longitude position and convert
         grid_goal = (750, 370)
         #print('Local Start and Goal: ', grid_start, grid_goal)
 
@@ -197,7 +198,7 @@ class MotionPlanning(Drone):
         print('Searching path')
         path, _ = a_star_graph(g, heuristic, start, goal)
 
-        show_path(g, grid, path, data, start, goal)
+        #show_path(g, grid, path, data, start, goal)
 
         print('Path length = ', len(path))
 
@@ -206,10 +207,10 @@ class MotionPlanning(Drone):
             exit(2)
 
         # Convert path to waypoints
-        waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
+        waypoints = [[int(p[0] + north_offset), int(p[1] + east_offset), TARGET_ALTITUDE, 0] for p in path]
         # Set self.waypoints
         self.waypoints = waypoints
-        # TODO: send waypoints to sim (this is just for visualization of waypoints)
+        # send waypoints to sim (this is just for visualization of waypoints)
         self.send_waypoints()
 
     def start(self):
