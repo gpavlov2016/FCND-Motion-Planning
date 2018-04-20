@@ -80,7 +80,6 @@ class MotionPlanning(Drone):
     def takeoff_transition(self):
         self.flight_state = States.TAKEOFF
         print("takeoff transition")
-        print(self.target_position[2])
         self.takeoff(self.target_position[2])
 
     def waypoint_transition(self):
@@ -121,7 +120,7 @@ class MotionPlanning(Drone):
 
         self.target_position[2] = TARGET_ALTITUDE
 
-        # TODO: read lat0, lon0 from colliders into floating point values
+        # read lat0, lon0 from colliders into floating point values
         filename = 'colliders.csv'
         f = open(filename, 'r')
         csv_reader = csv.reader(f)
@@ -141,29 +140,25 @@ class MotionPlanning(Drone):
                                                                          self.local_position))
         # Read in obstacle map
         data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=2)
-        
+
         # Define a grid for a particular altitude and safety margin around obstacles
-        grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
-        print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
-        # Define starting point on the grid (this is just grid center)
-        grid_start = (-north_offset, -east_offset)
-        # convert start position to current position rather than map center
-        #grid_start = (25,  100) #tuple(map(int, self.local_position[0:2]))
-        print('grid_start = ', grid_start)
-
-        # Set goal as some arbitrary position on the grid
-        grid_goal = (grid_start[0] + 10, grid_start[1] + 10)
-        # adapt to set goal as latitude / longitude position and convert
-        grid_goal = (750, 370)
-        #print('Local Start and Goal: ', grid_start, grid_goal)
-
-
-        drone_altitude = 5
-        safety_distance = 3
-
+        #grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
         # This is now the routine using Voronoi
-        grid, edges = create_grid_and_edges(data, drone_altitude, safety_distance)
-        print(len(edges))
+        grid, edges, north_offset, east_offset = create_grid_and_edges(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
+        print('Grid size = ', (len(grid), len(grid[0])))
+        print('Number of edges = ', len(edges))
+        print('north_offset, east_offset = ', north_offset, east_offset)
+
+        # Convert local position of the drone (can be negtive) to grid indexes (positive integers)
+        grid_start = (self._north - north_offset, self._east - east_offset)
+        print('grid_start = ', grid_start)
+        # Set goal in Geodetic coordinates (lat, lon)
+        goal_global = (-122.398986, 37.794309, 0) #275 Sacramento St
+        # Convert goal from global to local coords
+        goal_local = global_to_local(goal_global, self.global_home)
+        # Convert to grid coordinates (integers)
+        grid_goal = (goal_local[0] - north_offset, goal_local[1] - east_offset)
+        print('grid_goal = ', grid_goal)
 
         print('Generating free space graph')
         g = nx.Graph()
@@ -192,7 +187,7 @@ class MotionPlanning(Drone):
         #goal = closest_point(g, (grid_goal[0], grid_goal[1], 0))
         start = closest_point(g, grid_start)
         goal = closest_point(g, grid_goal)
-        print('Local Start and Goal: ', start, goal)
+        print('Graph start and goal: ', start, goal)
 
         # Run A* to find a path from start to goal
         print('Searching path')
@@ -206,8 +201,12 @@ class MotionPlanning(Drone):
             print('Path not found, termintating')
             exit(2)
 
-        # Convert path to waypoints
+        path = prune_path(path, grid)
+        print('pruned path length', len(path))
+
+        # Path is expressed in grid coordinates, shift it back to local coordinates
         waypoints = [[int(p[0] + north_offset), int(p[1] + east_offset), TARGET_ALTITUDE, 0] for p in path]
+
         # Set self.waypoints
         self.waypoints = waypoints
         # send waypoints to sim (this is just for visualization of waypoints)

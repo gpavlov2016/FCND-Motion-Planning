@@ -43,12 +43,12 @@ def create_grid_and_edges(data, drone_altitude, safety_distance):
             # add center of obstacles to points list
             points.append([north - north_min, east - east_min])
 
-    # TODO: create a voronoi graph based on
+    # create a voronoi graph based on
     # location of obstacle centres
     print('Generating Voronoi graph')
     graph = Voronoi(points)
 
-    # TODO: check each edge from graph.ridge_vertices for collision
+    # check each edge from graph.ridge_vertices for collision
     print('Checking edges for collisions')
     edges = []
     for i in trange(len(graph.ridge_vertices)):
@@ -77,7 +77,7 @@ def create_grid_and_edges(data, drone_altitude, safety_distance):
             p2 = (p2[0], p2[1])
             edges.append((p1, p2))
 
-    return grid, edges
+    return grid, edges, north_min, east_min
 
 def create_grid(data, drone_altitude, safety_distance):
     """
@@ -166,8 +166,6 @@ def valid_actions(grid, current_node):
 
 def a_star_graph(graph, heuristic, start, goal):
     """Modified A* to work with NetworkX graphs."""
-
-    # TODO: complete
 
     path = []
     queue = PriorityQueue()
@@ -396,3 +394,27 @@ def create_graph(nodes, polygons, k):
                 g.add_edge(n1, n2, weight=1)
     return g
 
+from bresenham import bresenham
+
+def prune_path(path, grid):
+    pruned_path = []
+    pruned_path.append(path[0])
+    last_added_idx = 0
+    for i in range(2, len(path)):
+        p1 = path[last_added_idx]
+        p2 = path[i]
+        cells = list(bresenham(int(p1[0]),
+                               int(p1[1]),
+                               int(p2[0]),
+                               int(p2[1])))
+        collides = False
+        for cell in cells:
+            if grid[cell] != 0:
+                collides = True
+                break
+        #print('i = ', i, ' collides = ', collides)
+        if collides:
+            pruned_path.append(path[i-1])
+            last_added_idx = i-1
+    pruned_path.append(path[-1])
+    return pruned_path
